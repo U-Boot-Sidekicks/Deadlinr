@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/deadlinr/css/bootstrap.css' />
+    <link rel='stylesheet' href='/deadlinr/css/bootstrap.calendar.css' />
+    <link rel='stylesheet' href='/deadlinr/css/app.css' />
+    <script type="text/javascript" src="/deadlinr/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/bootstrap.calendar.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/gauge.min.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/gauge.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/d3.v3.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div id="barchart" style="display:inline"></div>
+            <h1 style="float:right;margin-top:68px">Deadlinr <small></small></h1>
+        </div>
+<div class="row">
+  <div class="span6">
+    {{#highlights}}
+        <div class="alert alert-block {{colorAlert}}">
+            <canvas class="gauge" id="gauge{{ id }}"></canvas>
+                <h2 style="display:inline-block">{{ title }}</h2>
+            <div>
+                {{ smallTitle }}
+                {{ location }}
+                Expires on {{ expires_formatted }} <a href="{{ url }}">{{ url }}</a>{{tags}}
+                <div class="progress" style="height:6px">
+                    <div class="bar {{colorProgress}}" style="width: {{ progressBarAgo }}%; opacity:0.3"></div>
+                    <div class="bar {{colorProgress}}" style="width: {{ progressBarAhead }}%"></div>
+                </div>
+            </div>
+        </div>
+    {{/highlights}}
+    {{^highlights}}
+    <div class="well">
+        No deadlines found!
+    </div>
+    {{/highlights}}
+  </div>
+  <div class="span3">
+    {{#other}}
+    <div class="alert alert-block {{colorAlert}}">
+        <h4>{{ title }}</h4>
+        {{ smallTitle }}
+        <div class="progress" style="height:6px">
+            <div class="bar {{colorProgress}}" style="width: {{ progressBarAgo }}%; opacity:0.3"></div>
+            <div class="bar {{colorProgress}}" style="width: {{ progressBarAhead }}%"></div>
+        </div>
+    </div>
+    {{/other}}
+    <a href="/deadlinr/wall/{{ wall_id }}/all">View all</a>
+  </div>
+  <div class="span3">
+    <div class="well">
+        <button class="btn btn-block btn-primary" id="createDeadline">Create a Deadline now!</button>
+    </div>
+    <div class="well">
+        <div id="time" style="font-weight: bold; font-size: 24px; text-align: center;"></div>
+    </div>
+    <div id="events_calendar"></div>
+  </div>
+</div>
+
+<script src="/deadlinr/js/moment.min.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+        $("#createDeadline").click(function(event){
+            window.location.href = '/deadlinr/wall/{{ wall_id }}/add';
+        });
+
+        $("#events_calendar").Calendar({
+            events: all_events
+        });
+
+        renderBarChart('#barchart');
+
+        {{#highlights}}
+        setGauge({{ remainingDays }}, 'gauge{{ id }}');
+        {{/highlights}}
+    });
+
+    var all_events = function() {
+        return {
+            "event": [
+                {{#events}}
+                { 'title': '{{ title }}', 'date':'{{ date }}' },
+                {{/events}}
+            ]
+        }
+    };
+
+    setTimeout(function(){
+        document.location.reload(true)
+    }, 300000);
+
+    function updateTime(){
+        $( "#time" ).html(moment().format('HH:mm:ss '));
+        setTimeout(updateTime, 1000);
+    }
+
+    updateTime();
+
+    function renderBarChart(element_id) {
+        var margin = {top: 10, right: 10, bottom: 20, left: 40},
+            width = 760 - margin.left - margin.right,
+            height = 120 - margin.top - margin.bottom;
+
+        var formatPercent = d3.format("d");
+
+        var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
+
+        var y = d3.scale.linear()
+            .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left")
+            .tickFormat(formatPercent);
+
+        var svg = d3.select(element_id).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.tsv("/deadlinr/wall/{{ wall_id }}/aggregation.tsv", function(error, data) {
+
+          data.forEach(function(d) {
+            d.frequency = +d.frequency;
+          });
+
+          x.domain(data.map(function(d) { return d.date; }));
+          y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+          svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+
+          svg.append("g")
+              .attr("class", "y axis")
+              .call(yAxis)
+            .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", "-2.5em")
+              .style("text-anchor", "end")
+              .text("Deadlines");
+
+          svg.selectAll(".bar")
+              .data(data)
+            .enter().append("rect")
+              .attr("class", "bar")
+              .attr("x", function(d) { return x(d.date); })
+              .attr("width", x.rangeBand())
+              .attr("y", function(d) { return y(d.frequency); })
+              .attr("height", function(d) { return height - y(d.frequency); });
+
+        });
+    };
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome to Deadlinr: A Simple Wall Creator for Your Public Display to Visualize Deadlines!</title>
+    <link rel='stylesheet' href='/deadlinr/css/bootstrap.css' />
+    <link rel='stylesheet' href='/deadlinr/css/app.css' />
+    <script type="text/javascript" src="/deadlinr/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/deadlinr/js/bootstrap.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="hero-unit">
+      <div class="page-header">
+        <h1>Deadlinr</h1>
+        <hr/>
+        <p>
+          Create your personal wall with the upcoming deadlines visualization.
+        </p>
+
+        <div class="well" style="text-align:center; margin-top: 20px">
+            {{#error}}
+            <div class="alert alert-error">
+            Validation error. Please, provide a valid Email address!
+            </div>
+            {{/error}}
+
+            <form action="/deadlinr/start" method="post">
+              <fieldset>
+                <div class="input-append" style="margin-top: 20px">
+                <input class="span6" id="appendedInputButtons" type="text" name="email" placeholder="Your Email Address" value="{{ params.email }}">
+                <button type="submit" class="btn btn-primary">Create a Wall</button>
+                </div>
+              </fieldset>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+

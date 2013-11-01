@@ -1,0 +1,72 @@
+/* Start page */
+.hero-unit{
+  margin-top: 80px;
+}
+
+/* Calendar override */
+
+.year {
+    font-size: 22px;
+}
+
+.month {
+    font-size: 22px;
+    margin: 0px;
+    float: right;
+}
+.calendar {
+	border: none;
+}
+.calendar TH {
+    font-size: 20px;
+}
+
+.calendar TD, TD.day{
+    height: 22px;
+    font-size: 16px;
+}
+
+.calendar TD SPAN.weekday{
+    font-size: 16px;
+    background-color: #bbb;
+}
+.calendar TFOOT, .calendar TFOOT TR TH.sel {
+    font-size: 22px;
+}
+
+/* D3.js */
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: #006dcc;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.tick {
+  font-size: 12px;
+}
+
+/* Other stuff */
+
+.gauge {
+    display: inline-block;
+    vertical-align: top;
+    width: 80px;
+    height: 45px;
+    float: left;
+}
+
+.progress {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    height: 6px;
+}
